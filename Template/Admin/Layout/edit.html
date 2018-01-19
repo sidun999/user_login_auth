@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{$tpltitle|default="主体"}</title>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Admin/css/style.css" />
+<script type="text/javascript" src="__PUBLIC__/js/jquery.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/formValidator.js"></script>
+<script type="text/javascript" src="__PUBLIC__/js/formValidatorRegex.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Admin/js/function.js"></script>
+<!--下面是日期控件的js-->
+<script type="text/javascript" src="__PUBLIC__/My97DatePicker/WdatePicker.js"></script>
+<!-- <script type="text/javascript" src="__PUBLIC__/Admin/js/comments.js"></script> -->
+<!-- uploadify start -->
+<script type="text/javascript" src="__PUBLIC__/uploadify/jquery.uploadify.min.js"></script>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/uploadify/uploadify.css">  
+<style type="text/css">
+.uploadify-button{background-color: transparent; border: none; padding: 0;}
+.uploadify:hover .uploadify-button{background-color: transparent;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	var uploadIds = [];
+	for (var key in uploadSettings){
+		uploadIds.push("#"+key);
+	}
+	var uploadDefaults = {
+		swf : '__PUBLIC__/uploadify/uploadify.swf',
+		uploader : '{:U('/Admin/file/uploadify')}?{:session_name()}={:session_id()}',
+		multi : true,
+		width : 56,
+		height : 28,
+		buttonText :'上传',
+		buttonImage : '__PUBLIC__/uploadify/upload-submit.png',
+		fileTypeDesc : '图片格式',
+		fileTypeExts : '*.jpg;*.jpeg;*.png;*.gif;*.bmp;*.mp3;*.xls;*.mp4;*.flv',
+		formData : { 'sessionid' : '{:session_id()}'}, //传输数据
+		onUploadSuccess : function(file, data, response) {},  
+		onUploadError : function(file, errorCode, errorMsg, errorString){
+			alert('文件 ' + file.name + ' 不能被上传: ' + errorString);  
+		},
+		onUploadProgress : function(file, bytesUploaded, bytesTotal, totalBytesUploaded, totalBytesTotal){
+			$('#progress').html(totalBytesUploaded + ' bytes uploaded of ' + totalBytesTotal + ' bytes.');  
+		},
+		onUploadComplete : function(file){},
+	};
+	//初始化上传控件
+    $(uploadIds.join(',')).each(function(i,item){
+    	var finalSettings = $.extend(true,{},uploadDefaults, uploadSettings[this.id]);
+    	$(item).uploadify(finalSettings);
+    });
+    //排序调整
+    $(document).on('click', 'a[href=#imgup]', function(){
+		var imgP = $(this).parent('span').parent('span').parent('p');
+		var b = imgP.prev();
+		if(b.hasClass('photo_p')){
+			b.before(imgP);
+			setImageSort(b);
+		}
+	});
+	$(document).on('click', 'a[href=#imgdown]', function(){
+		var imgP = $(this).parent('span').parent('span').parent('p');
+		var n = imgP.next();
+		if(n.hasClass('photo_p')){
+			n.after(imgP);
+			setImageSort(n);
+		}
+	});
+	//删除图片
+	/*$(document).on('click', 'a[href=#delimg]', function(){
+		var id = $(this).attr('data-id');
+		if(id){
+			var val = $('#image1_is_del').val().split(',');
+			val.push(id);
+			$('#image1_is_del').val(val.join(','));
+		}
+		$(this).parent('.photo_p').remove();
+	});*/
+	
+	$(document).on('click', 'a[href=#delimg]', function(){
+		var id = $(this).attr('data-id');
+		if(id){
+			var is_del = $(this).parent().parent().prev('input');
+			var val = is_del.val().split(',');
+			val.push(id);
+			is_del.val(val.join(','));
+		}
+		$(this).parent('.photo_p').remove();
+	});
+	
+});
+
+//设置图片排序
+function setImageSort(obj){
+	n = obj.parent('div.photoInfoBox').children('.photo_p');
+	n.each(function(i,n){
+		$(this).find('input.image_sort').val(i);
+	});
+}
+//添加新上传图片
+function addPhoto(num,data){
+    var str = '<p class="photo_p">';
+    str+= '    <label>'+ data.save_name+'.'+ data.extension +'</label>';
+    str+= '    <a href="#delimg" class="del" data-id="">删除</a><br />';
+    str+= '    <textarea rows="1" cols="1" class="medium_input" style="float:left;max-width:500px;height:60px" name="image'+num+'_new[alt][]"></textarea>';
+    str+= '    <span class="imgSeat">';
+    str+= '         <span class="imgup"><a href="#imgup"><span>&uarr;</span></a></span>';
+    str+= '         <span class="imgdown"><a href="#imgdown"><span>&darr;</span></a></span>';
+    str+= '    </span>';
+    str+= '    <a href="{:C('web_path')}Uploads/temp/'+ data.save_name+'.'+ data.extension +'" target="_blank" class="imga"><img src="{:C('web_path')}{:C('upload_url')}temp/'+ data.save_name+'.'+ data.extension +'"" alt="" style="height:60px;" /></a>';
+    str+= '    <input type="hidden" name="image'+num+'_new[save_name][]" value="'+data.save_name+'" />';
+    str+= '    <input type="hidden" name="image'+num+'_new[extension][]" value="'+data.extension+'" />';
+    str+= '    <input type="hidden" name="image'+num+'_new[file_name][]" value="'+data.file_name+'" />';
+    str+= '    <input type="hidden" class="image_sort" name="image'+num+'_new[sort][]" value="'+$('.photo_p').size()+'" />';
+    str+= '</p>';
+    return str;
+}
+
+//添加新上传图片
+function addFile(num,data){
+    var str = '<p class="photo_p">';
+    str+= '    <label>'+ data.save_name+'.'+ data.extension +'</label>';
+    str+= '    <a href="#delimg" class="del" data-id="">删除</a><br />';
+    str+= '    <input type="hidden" name="upfile'+num+'_new[save_name][]" value="'+data.save_name+'" />';
+    str+= '    <input type="hidden" name="upfile'+num+'_new[extension][]" value="'+data.extension+'" />';
+    str+= '    <input type="hidden" name="upfile'+num+'_new[file_name][]" value="'+data.file_name+'" />';
+    str+= '    <input type="hidden" class="image_sort" name="upfile'+num+'_new[sort][]" value="'+$('.photo_p').size()+'" />';
+    str+= '</p>';
+    return str;
+}
+
+//添加新上传图片
+function addPic(num,data){
+    var str = '<p class="photo_p">';
+    str+= '    <label>'+ data.save_name+'.'+ data.extension +'</label>';
+    str+= '    <a href="#delimg" class="del" data-id="">删除</a><br />';
+    str+= '    <a href="{:C('web_path')}Uploads/temp/'+ data.save_name+'.'+ data.extension +'" target="_blank" class="imga"><img src="{:C('web_path')}{:C('upload_url')}temp/'+ data.save_name+'.'+ data.extension +'"" alt="" style="height:60px;" /></a>';
+    str+= '    <input type="hidden" name="uppic'+num+'_new[save_name][]" value="'+data.save_name+'" />';
+    str+= '    <input type="hidden" name="uppic'+num+'_new[extension][]" value="'+data.extension+'" />';
+    str+= '    <input type="hidden" name="uppic'+num+'_new[file_name][]" value="'+data.file_name+'" />';
+    str+= '    <input type="hidden" class="image_sort" name="uppic'+num+'_new[sort][]" value="'+$('.photo_p').size()+'" />';
+    str+= '</p>';
+    return str;
+}
+</script>
+<!-- uploadify end -->
+<!-- kindeditor start -->
+<script type="text/javascript" src="__PUBLIC__/editor/kindeditor-min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/editor/lang/zh_CN.js"></script>
+<!-- kindeditor end -->
+<script type="text/javascript">
+$(document).ready(function(){
+	var checkbox = $("#main_table tbody input[type='checkbox']");
+	$('#check_all').click(function(){
+		checkbox.attr('checked', $(this).is(':checked'));
+		if($(this).is(':checked')){
+			$("#main_table tbody tr").addClass('check');
+		}else{
+			$("#main_table tbody tr").removeClass('check');
+		}
+	});
+	checkbox.click(function(e){
+		if($(this).is(':checked')){
+			$(this).parents('tr').addClass('check');
+		}else{
+			$(this).parents('tr').removeClass('check');
+		}
+		if($("#main_table tbody input[type='checkbox']:not(:checked)").size()>0){
+			$('#check_all').attr('checked', false);
+		}else{
+			$('#check_all').attr('checked', true);
+		}
+		e.stopPropagation();//停止事件的传播，阻止它被分派到其他 Document 节点
+	});
+	
+	$('#main_table tbody tr').click(function(){
+		var cb = $(this).find(":checkbox");
+		if(cb.size()>0)
+			cb[0].click();
+	});
+	
+});
+
+function checksubmit(form,action){
+	if($("#main_table tbody input[type='checkbox']:checked").size()<1){
+		alert('请选择记录');
+		return false;
+	}
+	index = document.getElementById(action).selectedIndex;
+	str = document.getElementById(action).options[index].text.substr(3);
+	if(confirm('确定要执行'+str+'吗?')){
+		document.getElementById(form).submit();
+	}
+	return false;
+}
+</script>
+</head>
+<body>
+	<div id="right_main" style="">
+    	<div class="main_box">
+{__CONTENT__}
+    	</div>
+    </div>
+</body>
+</html>

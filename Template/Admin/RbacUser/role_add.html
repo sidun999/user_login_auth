@@ -1,0 +1,55 @@
+<extend name="Layout/mainDefault" />
+<block name="content">
+<script type="text/javascript">
+	$(document).ready(function() {
+		$.formValidator.initConfig({formid: "myform", autotip: true, onerror: function(msg, obj) {
+				window.top.art.dialog({content: msg, lock: true, width: 250, height: 100, ok: function() {
+						$(obj).focus();
+					}});
+			}});
+		$("#name").formValidator({onshow: "请输入角色名称", onfocus: "请输入角色名称"}).inputValidator({min: 1, onerror: "菜单名称必须填写"});
+		$("#remark").formValidator({empty: true, onshow: "请输入你的描述", onfocus: "请输入你的描述"}).inputValidator({max: 250, onerror: "描述不能超过250个字符,请确认"});
+	});
+</script>
+<gt name="info.id" value="0">
+<form action="{:U('/Admin/RbacUser/role_edit')}" method="post" name="form" id="myform">
+	<input type="hidden" name="id" value="{$info.id}">
+	<else />
+	<form action="{:U('/Admin/RbacUser/role_add')}" method="post" name="form" id="myform">
+		</gt>
+		<div class="main_title" style="position:fixed;top:0;left:0;right:10px;z-index:9999;">
+			<span class="title">
+				{$tpltitle}后台角色
+			</span>
+			<input class="titlebutton" type="submit" name="dosubmit" value="保 存" />
+			<span class="hr"></span>
+		</div>
+		<div class="main_content margintop36">
+			<table id="main_form" cellpadding="0" cellspacing="0">
+                <tr>
+                   	<td width="200">角色名称：</td>
+                    <td><input type="text" class="medium_input" id="name" name="name" maxlength="50" value="{$info.name}" /></td>
+                </tr>
+                <tr>
+                   	<td width="200">角色状态：</td>
+                    <td>
+						<label><input type="radio" class="radio" value="1" name="status" <if condition="($info.status eq 1) OR ($info['status'] eq '') ">checked=""</if> >
+							启用</label>
+						<label><input type="radio" class="radio" value="0" name="status" <eq name="info.status" value="0">checked=""</eq> >
+							关闭</label>
+					</td>
+                </tr>
+                <tr>
+                   	<td width="200">备注说明：</td>
+                    <td><input type="text" class="medium_input" id="remark" name="remark" maxlength="50" value="{$info.remark}" /></td>
+                </tr>
+			</table>
+            <div class="main_bottom">
+				<div class="main_submit">
+					<input id="subSubmit" type="submit" name="dosubmit" value="保 存" />
+                    <input id="subReset" type="button" onclick="history.back()" value="返 回" />
+                </div>
+            </div>
+        </div>
+	</form>
+</block>

@@ -1,0 +1,16 @@
+<include file="Layout:headerBase" />
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{$tpl.pageTitle|default="主体"}</title>
+    <link type="text/css" rel="stylesheet" href="__PUBLIC__/Admin/css/style.css" />
+    <block name="css"></block>
+    <block name="js"></block>
+    <block name="script"></block>
+</head>
+<body>
+<div id="right_main" style="">
+    <div class="main_box">
+        <block name="content"></block>
+    </div>
+</div>
+<include file="Layout:footerBase" />

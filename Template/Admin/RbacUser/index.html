@@ -1,0 +1,53 @@
+<extend name="Layout/mainDefault" />
+<block name="content">
+<div class="main_title" style="position:fixed;top:0;left:0;right:10px;z-index:9999;">
+	<span class="title">
+		用户管理
+	</span>
+	<input id="subSearch" type="button" onclick="location.href = '{:U(\'/Admin/RbacUser/add/\')}'" value="添加用户" />
+	<span class="hr"></span>
+</div>
+
+<div class="main_content margintop36">
+	<table id="main_table" cellpadding="0" cellspacing="0" >
+		<thead>
+			<tr>
+				<td width="40">ID</td>
+				<td width="80">用户名称</td>
+				<td width="100">用户姓名</td>
+				<td width="80">角色名称</td>
+				<td width="90">最后登录IP</td>
+				<td width="130">最后登录时间</td>
+				<td width="30">状态</td>
+				<td class="last">管理操作</td>
+			</tr>
+		</thead>
+		<tbody>
+		<volist name="list" id="vo" empty="$empty">
+			<tr>
+				<td>{$vo.id}</td>
+				<td >{$vo.username}</td>
+				<td >{$vo.uname}</td>
+				<td >{$role[$vo['role']]}</td>
+				<td>{$vo.last_login_ip}</td>
+				<td>{:get_color_date('Y-m-d H:i:s', $vo['last_login_time'])}</td>
+				<td><eq name="vo.status" value="1"><font color="red">√</font><else/><font color="blue">×</font></eq> 
+			</td>
+			<td class="last">
+				<a href="{:U('/Admin/RbacUser/edit/',array('id'=>$vo['id']))}" title="编辑">编辑</a>
+				<eq name="vo.username" value="$Think.config.SPECIAL_USER">
+			<else/><a href="javascript:void(0)" onclick="return confirmurl('{:U(\'/Admin/RbacUser/del/\',array('id'=>$vo['id']))}', '确定删除该用户吗?')" title="删除">删除</a>
+			</eq>
+			</td>
+			</tr>
+		</volist>
+		</tbody>
+	</table>
+
+	<div class="main_bottom">
+		<ul class="page">
+			{$page}
+		</ul>
+	</div>
+</div>
+</block>
